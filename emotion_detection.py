@@ -1,4 +1,4 @@
-import requests
+    import requests
 import json
 
 def emotion_detector(text_to_analyze):
@@ -14,11 +14,30 @@ def emotion_detector(text_to_analyze):
     }
     try:
         response = requests.post(url, headers=headers, json = payload)
-
+        # 🔥 Handle blank / bad request
+        if response.status_code == 400:
+            return {
+                "anger": None,
+                "disgust": None,
+                "fear": None,
+                "joy": None,
+                "sadness": None,
+                "dominant_emotion": None
+            }
         if response.status_code == 200:
             # return response.text
             jsonObj = json.load(response.text)
-            return jsonObj["emotionPredictions"][0]["emotion"]
+            emotions = jsonObj["emotionPredictions"][0]["emotion"]
+            result = {
+            "anger": emotions["anger"],
+            "disgust": emotions["disgust"],
+            "fear": emotions["fear"],
+            "joy": emotions["joy"],
+            "sadness": emotions["sadness"],
+            "dominant_emotion": max(emotions, key=emotions.get)
+        }
+
+        return result
         else:
             return f"Error {response.status_code}: {response.text}"
     except Exception as e:
